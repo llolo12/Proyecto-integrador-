@@ -1,4 +1,4 @@
-omenimport { BrowserRouter, Routes, Route } from 'react-router-dom';
+﻿import { BrowserRouter, Routes, Route } from 'react-router-dom';
 import { useTranslation } from 'react-i18next';
 import { AuthProvider } from './context/AuthContext';
 import Layout from './components/layout/Layout';
@@ -16,7 +16,7 @@ function NotFound() {
   const { t } = useTranslation();
   return (
     <div className="flex min-h-[60vh] items-center justify-center">
-      <p className="text-pv-gray text-lg">404 — {t('common.404')}</p>
+      <p className="text-pv-gray text-lg">404 â€” {t('common.404')}</p>
     </div>
   );
 }
@@ -33,7 +33,7 @@ export default function App() {
             <Route path="/explorar" element={<ListadoProveedores />} />
             <Route path="/explorar/:id" element={<DetalleProveedor />} />
 
-            {/* Ruta de demostración del panel del proveedor (sin autenticación) */}
+            {/* Ruta de demostraciÃ³n del panel del proveedor (sin autenticaciÃ³n) */}
             <Route path="/demo/proveedor" element={<DemoProveedor />} />
 
             <Route element={<PrivateRoute />}>
