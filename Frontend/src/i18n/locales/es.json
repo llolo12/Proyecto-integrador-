@@ -1,0 +1,65 @@
+{
+  "nav": {
+    "explorar": "Explorar",
+    "iniciar_sesion": "Iniciar sesión",
+    "registrarse": "Registrarse",
+    "admin": "Admin",
+    "mi_perfil": "Mi Perfil",
+    "cerrar_sesion": "Cerrar sesión"
+  },
+  "landing": {
+    "hero_title": "Descubrí Puntarenas",
+    "hero_subtitle": "Hoteles, restaurantes, guías y actividades. Todo lo que necesitás para tu próxima aventura en el Pacífico Central.",
+    "explorar": "Explorar",
+    "soy_proveedor": "Soy proveedor",
+    "categorias": "Categorías",
+    "destacados": "Proveedores destacados",
+    "cta_title": "¿Sos proveedor turístico?",
+    "cta_subtitle": "Registrá tu negocio y aparecé en el directorio turístico de Puntarenas. Llegá a más visitantes.",
+    "cta_button": "Registrar mi negocio"
+  },
+  "categorias": {
+    "hoteles": "Hoteles",
+    "restaurantes": "Restaurantes",
+    "guias": "Guías Turísticos",
+    "actividades": "Actividades"
+  },
+  "auth": {
+    "iniciar_sesion": "Iniciar sesión",
+    "crear_cuenta": "Crear cuenta",
+    "correo": "Correo",
+    "contrasena": "Contraseña",
+    "nombre": "Nombre",
+    "entrar": "Entrar",
+    "no_tienes_cuenta": "¿No tenés cuenta?",
+    "ya_tienes_cuenta": "¿Ya tenés cuenta?",
+    "error_credenciales": "Credenciales inválidas",
+    "error_registro": "Error al registrarse. Intente de nuevo.",
+    "registrar_negocio": "Registrar mi negocio",
+    "sos_proveedor": "¿Sos proveedor?"
+  },
+  "explorar": {
+    "titulo": "Explorar proveedores",
+    "buscar": "Buscar por nombre...",
+    "sin_resultados": "No se encontraron proveedores.",
+    "estado_verificacion": "Estado",
+    "horarios": "Horarios",
+    "contacto": "Contacto",
+    "cerrado": "Cerrado"
+  },
+  "proveedor": {
+    "panel": "Panel del Proveedor",
+    "descripcion": "Acá vas a poder editar tu perfil, horarios, imágenes y contacto."
+  },
+  "admin": {
+    "panel": "Panel de Administración",
+    "descripcion": "Acá vas a poder gestionar proveedores, usuarios, destinos y ver logs de auditoría."
+  },
+  "footer": {
+    "hecho": "Hecho con dedicación para Puntarenas"
+  },
+  "common": {
+    "cargando": "Cargando...",
+    "404": "Página no encontrada"
+  }
+}

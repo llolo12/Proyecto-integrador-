@@ -1,0 +1,65 @@
+{
+  "nav": {
+    "explorar": "Explore",
+    "iniciar_sesion": "Sign In",
+    "registrarse": "Register",
+    "admin": "Admin",
+    "mi_perfil": "My Profile",
+    "cerrar_sesion": "Log out"
+  },
+  "landing": {
+    "hero_title": "Discover Puntarenas",
+    "hero_subtitle": "Hotels, restaurants, guides and activities. Everything you need for your next adventure in the Central Pacific.",
+    "explorar": "Explore",
+    "soy_proveedor": "I'm a provider",
+    "categorias": "Categories",
+    "destacados": "Featured Providers",
+    "cta_title": "Are you a tourism provider?",
+    "cta_subtitle": "Register your business and appear in the Puntarenas tourism directory. Reach more visitors.",
+    "cta_button": "Register my business"
+  },
+  "categorias": {
+    "hoteles": "Hotels",
+    "restaurantes": "Restaurants",
+    "guias": "Tour Guides",
+    "actividades": "Activities"
+  },
+  "auth": {
+    "iniciar_sesion": "Sign In",
+    "crear_cuenta": "Create Account",
+    "correo": "Email",
+    "contrasena": "Password",
+    "nombre": "Name",
+    "entrar": "Sign In",
+    "no_tienes_cuenta": "Don't have an account?",
+    "ya_tienes_cuenta": "Already have an account?",
+    "error_credenciales": "Invalid credentials",
+    "error_registro": "Registration failed. Please try again.",
+    "registrar_negocio": "Register my business",
+    "sos_proveedor": "Are you a provider?"
+  },
+  "explorar": {
+    "titulo": "Explore Providers",
+    "buscar": "Search by name...",
+    "sin_resultados": "No providers found.",
+    "estado_verificacion": "Status",
+    "horarios": "Hours",
+    "contacto": "Contact",
+    "cerrado": "Closed"
+  },
+  "proveedor": {
+    "panel": "Provider Panel",
+    "descripcion": "Here you can edit your profile, hours, images and contact info."
+  },
+  "admin": {
+    "panel": "Admin Dashboard",
+    "descripcion": "Here you can manage providers, users, destinations and view audit logs."
+  },
+  "footer": {
+    "hecho": "Made with dedication for Puntarenas"
+  },
+  "common": {
+    "cargando": "Loading...",
+    "404": "Page not found"
+  }
+}
