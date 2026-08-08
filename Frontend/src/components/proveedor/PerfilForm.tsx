@@ -1,3 +1,18 @@
+/**
+ * Componente: PerfilForm
+ * 
+ * Formulario editable para el perfil del proveedor.
+ * Permite modificar:
+ * - Nombre del negocio
+ * - Descripción
+ * - Declaratoria ICT (checkbox)
+ * - Coordenadas geográficas (lat/lng)
+ * 
+ * Conecta con: PUT /proveedores/{id}
+ * 
+ * @param proveedor - Datos actuales del proveedor
+ * @param onSave - Función callback para guardar los cambios
+ */
 import { useState, useEffect } from 'react';
 import { useTranslation } from 'react-i18next';
 import { Save, Loader2 } from 'lucide-react';
@@ -10,6 +25,8 @@ interface PerfilFormProps {
 
 export default function PerfilForm({ proveedor, onSave }: PerfilFormProps) {
   const { t } = useTranslation();
+  
+  // Estado local del formulario (se sincroniza con los props)
   const [formData, setFormData] = useState({
     nombre: proveedor.nombre || '',
     descripcion: proveedor.descripcion || '',
@@ -17,9 +34,12 @@ export default function PerfilForm({ proveedor, onSave }: PerfilFormProps) {
     lat: proveedor.lat,
     lng: proveedor.lng,
   });
+  
+  // Estado para el botón de guardar y mensajes
   const [saving, setSaving] = useState(false);
   const [message, setMessage] = useState<{ type: 'success' | 'error'; text: string } | null>(null);
 
+  // Sincronizar formulario cuando cambian los datos del proveedor
   useEffect(() => {
     setFormData({
       nombre: proveedor.nombre || '',
@@ -30,6 +50,10 @@ export default function PerfilForm({ proveedor, onSave }: PerfilFormProps) {
     });
   }, [proveedor]);
 
+  /**
+   * Maneja cambios en los inputs del formulario
+   * Detecta si es checkbox o input normal para obtener el valor correcto
+   */
   const handleChange = (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>) => {
     const { name, value, type } = e.target;
     setFormData(prev => ({
@@ -38,6 +62,10 @@ export default function PerfilForm({ proveedor, onSave }: PerfilFormProps) {
     }));
   };
 
+  /**
+   * Envía el formulario al servidor
+   * Muestra mensaje de éxito/error y lo oculta después de 3 segundos
+   */
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     setSaving(true);
@@ -62,7 +90,7 @@ export default function PerfilForm({ proveedor, onSave }: PerfilFormProps) {
       </h2>
 
       <div className="space-y-4">
-        {/* Nombre */}
+        {/* Campo: Nombre del negocio */}
         <div>
           <label htmlFor="nombre" className="block text-sm font-medium text-gray-700 mb-1">
             {t('proveedor.perfil.nombre', 'Nombre del negocio')}
@@ -78,7 +106,7 @@ export default function PerfilForm({ proveedor, onSave }: PerfilFormProps) {
           />
         </div>
 
-        {/* Descripción */}
+        {/* Campo: Descripción del negocio */}
         <div>
           <label htmlFor="descripcion" className="block text-sm font-medium text-gray-700 mb-1">
             {t('proveedor.perfil.descripcion', 'Descripción')}
@@ -94,7 +122,7 @@ export default function PerfilForm({ proveedor, onSave }: PerfilFormProps) {
           />
         </div>
 
-        {/* Declaratoria ICT */}
+        {/* Campo: Declaratoria ICT (checkbox) */}
         <div className="flex items-center gap-2">
           <input
             type="checkbox"
@@ -109,7 +137,7 @@ export default function PerfilForm({ proveedor, onSave }: PerfilFormProps) {
           </label>
         </div>
 
-        {/* Coordenadas (opcional) */}
+        {/* Campos: Coordenadas geográficas (opcionales) */}
         <div className="grid grid-cols-2 gap-4">
           <div>
             <label htmlFor="lat" className="block text-sm font-medium text-gray-700 mb-1">
@@ -144,7 +172,7 @@ export default function PerfilForm({ proveedor, onSave }: PerfilFormProps) {
         </div>
       </div>
 
-      {/* Mensaje */}
+      {/* Mensaje de éxito/error (se muestra temporalmente) */}
       {message && (
         <div className={`mt-4 p-3 rounded-md text-sm ${
           message.type === 'success' ? 'bg-green-50 text-green-700' : 'bg-red-50 text-red-700'
@@ -153,7 +181,7 @@ export default function PerfilForm({ proveedor, onSave }: PerfilFormProps) {
         </div>
       )}
 
-      {/* Botón guardar */}
+      {/* Botón de guardar con estado de carga */}
       <div className="mt-6 flex justify-end">
         <button
           type="submit"

@@ -1,3 +1,23 @@
+/**
+ * Componente: ContactoForm
+ * 
+ * Formulario para gestionar la información de contacto del proveedor.
+ * Tipos de contacto soportados:
+ * - Teléfono
+ * - WhatsApp
+ * - Sitio Web
+ * - Instagram
+ * 
+ * Funcionalidades:
+ * - Agregar/eliminar tipos de contacto dinámicamente
+ * - Validación de campos vacíos (no se guardan)
+ * - Iconos específicos para cada tipo
+ * 
+ * Conecta con: PUT /proveedores/{id}/contactos
+ * 
+ * @param contactos - Array de contactos actuales
+ * @param onSave - Callback para guardar los cambios
+ */
 import { useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import { Save, Loader2, Plus, Trash2, Phone, Globe, AtSign, MessageCircle } from 'lucide-react';
@@ -8,8 +28,16 @@ interface ContactoFormProps {
   onSave: (contactos: ContactoProveedor[]) => Promise<{ success: boolean; error?: string }>;
 }
 
+// Tipo de contacto disponible
 type TipoContacto = ContactoProveedor['tipo'];
 
+/**
+ * Configuración de cada tipo de contacto:
+ * - tipo: identificador del tipo
+ * - label: nombre visible
+ * - icon: componente de icono de lucide-react
+ * - placeholder: texto de ejemplo para el input
+ */
 const TIPOS_CONTACTO: { tipo: TipoContacto; label: string; icon: React.ElementType; placeholder: string }[] = [
   { tipo: 'telefono', label: 'Teléfono', icon: Phone, placeholder: '+506 2222-3333' },
   { tipo: 'whatsapp', label: 'WhatsApp', icon: MessageCircle, placeholder: '+506 8888-9999' },
@@ -19,10 +47,17 @@ const TIPOS_CONTACTO: { tipo: TipoContacto; label: string; icon: React.ElementTy
 
 export default function ContactoForm({ contactos, onSave }: ContactoFormProps) {
   const { t } = useTranslation();
+  
+  // Estado local con los contactos editados
   const [contactosEditados, setContactosEditados] = useState<ContactoProveedor[]>(contactos);
+  
+  // Estado para el botón de guardar y mensajes
   const [saving, setSaving] = useState(false);
   const [message, setMessage] = useState<{ type: 'success' | 'error'; text: string } | null>(null);
 
+  /**
+   * Agrega un nuevo tipo de contacto (si no existe ya)
+   */
   const handleAddContacto = (tipo: TipoContacto) => {
     const existe = contactosEditados.find(c => c.tipo === tipo);
     if (existe) return;
@@ -30,22 +65,32 @@ export default function ContactoForm({ contactos, onSave }: ContactoFormProps) {
     setContactosEditados(prev => [...prev, { tipo, valor: '' }]);
   };
 
+  /**
+   * Elimina un tipo de contacto de la lista
+   */
   const handleRemoveContacto = (tipo: TipoContacto) => {
     setContactosEditados(prev => prev.filter(c => c.tipo !== tipo));
   };
 
+  /**
+   * Actualiza el valor de un contacto específico
+   */
   const handleValorChange = (tipo: TipoContacto, valor: string) => {
     setContactosEditados(prev => prev.map(c => 
       c.tipo === tipo ? { ...c, valor } : c
     ));
   };
 
+  /**
+   * Envía los contactos al servidor
+   * Filtra los contactos vacíos antes de guardar
+   */
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     setSaving(true);
     setMessage(null);
 
-    // Filtrar contactos vacíos
+    // Filtrar contactos vacíos (no guardar campos sin valor)
     const contactosValidos = contactosEditados.filter(c => c.valor.trim() !== '');
     
     const result = await onSave(contactosValidos);
@@ -60,6 +105,7 @@ export default function ContactoForm({ contactos, onSave }: ContactoFormProps) {
     setTimeout(() => setMessage(null), 3000);
   };
 
+  // Calcular tipos disponibles (que no han sido agregados aún)
   const tiposDisponibles = TIPOS_CONTACTO.filter(
     tc => !contactosEditados.find(c => c.tipo === tc.tipo)
   );
@@ -70,6 +116,7 @@ export default function ContactoForm({ contactos, onSave }: ContactoFormProps) {
         {t('proveedor.contacto.titulo', 'Información de Contacto')}
       </h2>
 
+      {/* Mensaje temporal de éxito/error */}
       {message && (
         <div className={`mb-4 p-3 rounded-md text-sm ${
           message.type === 'success' ? 'bg-green-50 text-green-700' : 'bg-red-50 text-red-700'
@@ -78,8 +125,10 @@ export default function ContactoForm({ contactos, onSave }: ContactoFormProps) {
         </div>
       )}
 
+      {/* Lista de contactos editables */}
       <div className="space-y-4">
         {contactosEditados.map((contacto) => {
+          // Buscar configuración del tipo de contacto
           const tipoInfo = TIPOS_CONTACTO.find(tc => tc.tipo === contacto.tipo);
           if (!tipoInfo) return null;
 
@@ -87,10 +136,12 @@ export default function ContactoForm({ contactos, onSave }: ContactoFormProps) {
 
           return (
             <div key={contacto.tipo} className="flex items-center gap-3">
+              {/* Icono y label del tipo */}
               <div className="flex items-center gap-2 w-32 text-gray-600">
                 <Icon className="w-5 h-5" />
                 <span className="text-sm font-medium">{tipoInfo.label}</span>
               </div>
+              {/* Input para el valor */}
               <input
                 type="text"
                 value={contacto.valor}
@@ -98,6 +149,7 @@ export default function ContactoForm({ contactos, onSave }: ContactoFormProps) {
                 placeholder={tipoInfo.placeholder}
                 className="flex-1 px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-pv-green"
               />
+              {/* Botón eliminar */}
               <button
                 type="button"
                 onClick={() => handleRemoveContacto(contacto.tipo)}
@@ -111,7 +163,7 @@ export default function ContactoForm({ contactos, onSave }: ContactoFormProps) {
         })}
       </div>
 
-      {/* Botones para agregar tipos */}
+      {/* Botones para agregar tipos de contacto disponibles */}
       {tiposDisponibles.length > 0 && (
         <div className="mt-4 flex flex-wrap gap-2">
           {tiposDisponibles.map((tc) => {
@@ -132,7 +184,7 @@ export default function ContactoForm({ contactos, onSave }: ContactoFormProps) {
         </div>
       )}
 
-      {/* Botón guardar */}
+      {/* Botón de guardar con estado de carga */}
       <div className="mt-6 flex justify-end">
         <button
           type="submit"

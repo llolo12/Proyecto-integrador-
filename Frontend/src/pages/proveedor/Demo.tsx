@@ -1,3 +1,16 @@
+/**
+ * Página: Demo del Panel del Proveedor
+ * 
+ * Página de demostración con datos mock para probar el panel sin autenticación.
+ * Útil para:
+ * - Visualizar el diseño y funcionalidades
+ * - Pruebas rápidas sin backend
+ * - Demostraciones a terceros
+ * 
+ * NOTA: Los cambios no se guardan en la base de datos.
+ * 
+ * Ruta: /demo/proveedor (pública, sin autenticación)
+ */
 import { useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import EstadoVerificacion from '../../components/proveedor/EstadoVerificacion';
@@ -8,9 +21,13 @@ import ExcepcionesHorario from '../../components/proveedor/ExcepcionesHorario';
 import ContactoForm from '../../components/proveedor/ContactoForm';
 import type { Proveedor, HorarioSemanal, ExcepcionHorario, ContactoProveedor, ImagenProveedor } from '../../types/proveedor';
 
+// Tipos de tabs disponibles
 type TabId = 'perfil' | 'imagenes' | 'horarios' | 'excepciones' | 'contacto';
 
-// Datos mock para demostración
+/**
+ * Datos mock para demostración
+ * Simulan un proveedor real con información de ejemplo
+ */
 const MOCK_PROVEEDOR: Proveedor = {
   id: 'demo-001',
   usuario_id: 'user-001',
@@ -25,6 +42,7 @@ const MOCK_PROVEEDOR: Proveedor = {
   categoria: { id: 'cat-001', nombre: 'Restaurantes' },
 };
 
+// Horarios mock: lunes a domingo con horarios típicos
 const MOCK_HORARIOS: HorarioSemanal[] = [
   { id: 'h1', dia_semana: 'lunes', hora_apertura: '08:00', hora_cierre: '17:00', abierto: true },
   { id: 'h2', dia_semana: 'martes', hora_apertura: '08:00', hora_cierre: '17:00', abierto: true },
@@ -35,6 +53,7 @@ const MOCK_HORARIOS: HorarioSemanal[] = [
   { id: 'h7', dia_semana: 'domingo', hora_apertura: '09:00', hora_cierre: '15:00', abierto: true },
 ];
 
+// Excepciones mock: feriado y mantenimiento
 const MOCK_EXCEPCIONES: ExcepcionHorario[] = [
   {
     id: 'e1',
@@ -56,6 +75,7 @@ const MOCK_EXCEPCIONES: ExcepcionHorario[] = [
   },
 ];
 
+// Contactos mock: teléfono, WhatsApp, web e Instagram
 const MOCK_CONTACTOS: ContactoProveedor[] = [
   { id: 'c1', tipo: 'telefono', valor: '+506 2222-3333' },
   { id: 'c2', tipo: 'whatsapp', valor: '+506 8888-9999' },
@@ -63,6 +83,7 @@ const MOCK_CONTACTOS: ContactoProveedor[] = [
   { id: 'c4', tipo: 'instagram', valor: '@puravidarestaurante' },
 ];
 
+// Imágenes mock: 4 imágenes de Unsplash
 const MOCK_IMAGENES: ImagenProveedor[] = [
   { id: 'i1', url_webp: 'https://images.unsplash.com/photo-1517248135467-4c7edcad34c4?w=400', orden: 0 },
   { id: 'i2', url_webp: 'https://images.unsplash.com/photo-1414235077428-338989a2e8c0?w=400', orden: 1 },
@@ -72,13 +93,18 @@ const MOCK_IMAGENES: ImagenProveedor[] = [
 
 export default function DemoProveedor() {
   const { t } = useTranslation();
+  
+  // Estado para la tab activa
   const [activeTab, setActiveTab] = useState<TabId>('perfil');
+  
+  // Estados locales con datos mock (simulan el estado del hook useProveedor)
   const [proveedor, setProveedor] = useState(MOCK_PROVEEDOR);
   const [horarios, setHorarios] = useState(MOCK_HORARIOS);
   const [excepciones, setExcepciones] = useState(MOCK_EXCEPCIONES);
   const [contactos, setContactos] = useState(MOCK_CONTACTOS);
   const [imagenes, setImagenes] = useState(MOCK_IMAGENES);
 
+  // Configuración de las tabs
   const tabs: { id: TabId; label: string }[] = [
     { id: 'perfil', label: 'Mi Perfil' },
     { id: 'imagenes', label: 'Imágenes' },
@@ -87,7 +113,7 @@ export default function DemoProveedor() {
     { id: 'contacto', label: 'Contacto' },
   ];
 
-  // Handlers mock (simulan éxito)
+  // Handlers mock: simulan guardado exitoso con delay
   const handleSavePerfil = async (data: Partial<Proveedor>) => {
     setProveedor(prev => ({ ...prev, ...data }));
     console.log('Perfil guardado:', data);
@@ -144,7 +170,7 @@ export default function DemoProveedor() {
 
   return (
     <div className="mx-auto max-w-6xl px-4 py-8">
-      {/* Banner de demo */}
+      {/* Banner informativo de modo demo */}
       <div className="mb-6 p-4 bg-blue-50 border border-blue-200 rounded-lg">
         <p className="text-blue-800 font-medium">
           🧪 Modo Demostración
@@ -155,7 +181,7 @@ export default function DemoProveedor() {
         </p>
       </div>
 
-      {/* Header */}
+      {/* Header: Título y nombre del proveedor */}
       <div className="mb-6">
         <h1 className="text-2xl font-bold text-gray-800">
           {t('proveedor.panel.titulo', 'Panel del Proveedor')}
@@ -163,12 +189,12 @@ export default function DemoProveedor() {
         <p className="text-gray-600 mt-1">{proveedor.nombre}</p>
       </div>
 
-      {/* Estado de verificación */}
+      {/* Estado de verificación (siempre visible) */}
       <div className="mb-6">
         <EstadoVerificacion estado={proveedor.estado_verificacion} />
       </div>
 
-      {/* Tabs */}
+      {/* Navegación por tabs */}
       <div className="border-b border-gray-200 mb-6">
         <nav className="flex gap-4 overflow-x-auto">
           {tabs.map((tab) => (
@@ -187,7 +213,7 @@ export default function DemoProveedor() {
         </nav>
       </div>
 
-      {/* Content */}
+      {/* Contenido de la tab activa */}
       <div className="space-y-6">
         {activeTab === 'perfil' && (
           <PerfilForm proveedor={proveedor} onSave={handleSavePerfil} />

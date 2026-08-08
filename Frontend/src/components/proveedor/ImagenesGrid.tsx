@@ -1,3 +1,22 @@
+/**
+ * Componente: ImagenesGrid
+ * 
+ * Galería de imágenes del proveedor con funcionalidades:
+ * - Drag & drop para subir imágenes
+ * - Visualización tipo grid responsive
+ * - Reordenar imágenes arrastrando
+ * - Eliminar imágenes individuales
+ * 
+ * Conecta con:
+ * - POST /proveedores/{id}/imagenes (subir)
+ * - DELETE /proveedores/{id}/imagenes/{imagenId} (eliminar)
+ * - PUT /proveedores/{id}/imagenes/reorder (reordenar)
+ * 
+ * @param imagenes - Array de imágenes actuales del proveedor
+ * @param onUpload - Callback para subir nueva imagen
+ * @param onDelete - Callback para eliminar imagen
+ * @param onReorder - Callback para reordenar imágenes
+ */
 import { useState, useRef, useCallback } from 'react';
 import { useTranslation } from 'react-i18next';
 import { Upload, X, GripVertical, Loader2, Image as ImageIcon } from 'lucide-react';
@@ -12,17 +31,32 @@ interface ImagenesGridProps {
 
 export default function ImagenesGrid({ imagenes, onUpload, onDelete, onReorder }: ImagenesGridProps) {
   const { t } = useTranslation();
+  
+  // Estados para drag & drop de archivos
   const [dragOver, setDragOver] = useState(false);
   const [uploading, setUploading] = useState(false);
+  
+  // Estado para drag & drop de reordenamiento
   const [draggedItem, setDraggedItem] = useState<number | null>(null);
+  
+  // Estado para mensajes de éxito/error
   const [message, setMessage] = useState<{ type: 'success' | 'error'; text: string } | null>(null);
+  
+  // Referencia al input de archivo oculto
   const fileInputRef = useRef<HTMLInputElement>(null);
 
+  /**
+   * Muestra un mensaje temporal (se oculta después de 3 segundos)
+   */
   const showMessage = (type: 'success' | 'error', text: string) => {
     setMessage({ type, text });
     setTimeout(() => setMessage(null), 3000);
   };
 
+  /**
+   * Procesa los archivos seleccionados/subidos
+   * Filtra solo imágenes y las sube una por una
+   */
   const handleFiles = useCallback(async (files: FileList | null) => {
     if (!files || files.length === 0) return;
 
@@ -31,6 +65,7 @@ export default function ImagenesGrid({ imagenes, onUpload, onDelete, onReorder }
 
     for (let i = 0; i < files.length; i++) {
       const file = files[i];
+      // Solo procesar archivos de imagen
       if (!file.type.startsWith('image/')) continue;
 
       const result = await onUpload(file, nextOrden + i);
@@ -42,21 +77,33 @@ export default function ImagenesGrid({ imagenes, onUpload, onDelete, onReorder }
     setUploading(false);
   }, [imagenes, onUpload, t]);
 
+  /**
+   * Maneja cuando se sueltan archivos en la zona de drop
+   */
   const handleDrop = useCallback((e: React.DragEvent) => {
     e.preventDefault();
     setDragOver(false);
     handleFiles(e.dataTransfer.files);
   }, [handleFiles]);
 
+  /**
+   * Activa el estado visual cuando se arrastra sobre la zona
+   */
   const handleDragOver = (e: React.DragEvent) => {
     e.preventDefault();
     setDragOver(true);
   };
 
+  /**
+   * Desactiva el estado visual cuando sale de la zona
+   */
   const handleDragLeave = () => {
     setDragOver(false);
   };
 
+  /**
+   * Maneja la selección de archivos desde el input
+   */
   const handleFileSelect = (e: React.ChangeEvent<HTMLInputElement>) => {
     handleFiles(e.target.files);
     if (fileInputRef.current) {
@@ -64,6 +111,9 @@ export default function ImagenesGrid({ imagenes, onUpload, onDelete, onReorder }
     }
   };
 
+  /**
+   * Elimina una imagen con confirmación
+   */
   const handleDelete = async (imagenId: string) => {
     if (!confirm(t('proveedor.imagenes.confirmar_eliminar', '¿Estás seguro de eliminar esta imagen?'))) return;
 
@@ -75,23 +125,34 @@ export default function ImagenesGrid({ imagenes, onUpload, onDelete, onReorder }
     }
   };
 
+  /**
+   * Inicia el arrastre de una imagen para reordenar
+   */
   const handleDragStart = (index: number) => {
     setDraggedItem(index);
   };
 
+  /**
+   * Finaliza el arrastre
+   */
   const handleDragEnd = async () => {
     setDraggedItem(null);
   };
 
+  /**
+   * Maneja el movimiento sobre otra imagen durante el reordenamiento
+   * Calcula el nuevo orden y lo envía al servidor
+   */
   const handleDragOverItem = async (e: React.DragEvent, targetIndex: number) => {
     e.preventDefault();
     if (draggedItem === null || draggedItem === targetIndex) return;
 
+    // Crear nuevo orden moviendo el elemento arrastrado
     const newOrder = [...imagenes];
     const [removed] = newOrder.splice(draggedItem, 1);
     newOrder.splice(targetIndex, 0, removed);
 
-    // Update orden values
+    // Actualizar valores de orden
     const reordered = newOrder.map((img, idx) => ({ ...img, orden: idx }));
     
     const result = await onReorder(reordered);
@@ -102,6 +163,7 @@ export default function ImagenesGrid({ imagenes, onUpload, onDelete, onReorder }
     setDraggedItem(targetIndex);
   };
 
+  // Ordenar imágenes por su campo "orden"
   const sortedImages = [...imagenes].sort((a, b) => a.orden - b.orden);
 
   return (
@@ -110,6 +172,7 @@ export default function ImagenesGrid({ imagenes, onUpload, onDelete, onReorder }
         {t('proveedor.imagenes.titulo', 'Imágenes')}
       </h2>
 
+      {/* Mensaje temporal de éxito/error */}
       {message && (
         <div className={`mb-4 p-3 rounded-md text-sm ${
           message.type === 'success' ? 'bg-green-50 text-green-700' : 'bg-red-50 text-red-700'
@@ -118,7 +181,7 @@ export default function ImagenesGrid({ imagenes, onUpload, onDelete, onReorder }
         </div>
       )}
 
-      {/* Drop zone */}
+      {/* Zona de drop para subir imágenes */}
       <div
         onDrop={handleDrop}
         onDragOver={handleDragOver}
@@ -130,6 +193,7 @@ export default function ImagenesGrid({ imagenes, onUpload, onDelete, onReorder }
             : 'border-gray-300 hover:border-gray-400'
         }`}
       >
+        {/* Input oculto para selección de archivos */}
         <input
           ref={fileInputRef}
           type="file"
@@ -153,7 +217,7 @@ export default function ImagenesGrid({ imagenes, onUpload, onDelete, onReorder }
         )}
       </div>
 
-      {/* Grid de imágenes */}
+      {/* Grid de imágenes (solo si hay imágenes) */}
       {sortedImages.length > 0 && (
         <div className="mt-6 grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 gap-4">
           {sortedImages.map((imagen, index) => (
@@ -167,13 +231,14 @@ export default function ImagenesGrid({ imagenes, onUpload, onDelete, onReorder }
                 draggedItem === index ? 'opacity-50' : ''
               }`}
             >
+              {/* Imagen */}
               <img
                 src={imagen.url_webp}
                 alt={`Imagen ${index + 1}`}
                 className="w-full h-full object-cover"
               />
               
-              {/* Overlay con acciones */}
+              {/* Overlay con botón eliminar (visible al hover) */}
               <div className="absolute inset-0 bg-black/50 opacity-0 group-hover:opacity-100 transition-opacity flex items-center justify-center gap-2">
                 <button
                   onClick={(e) => {
@@ -187,7 +252,7 @@ export default function ImagenesGrid({ imagenes, onUpload, onDelete, onReorder }
                 </button>
               </div>
 
-              {/* Handle de arrastre */}
+              {/* Icono de arrastre (visible al hover) */}
               <div className="absolute top-2 left-2 p-1 bg-white/80 rounded cursor-move opacity-0 group-hover:opacity-100 transition-opacity">
                 <GripVertical className="w-4 h-4 text-gray-600" />
               </div>
@@ -201,6 +266,7 @@ export default function ImagenesGrid({ imagenes, onUpload, onDelete, onReorder }
         </div>
       )}
 
+      {/* Estado vacío cuando no hay imágenes */}
       {sortedImages.length === 0 && !uploading && (
         <div className="mt-6 text-center py-8 text-gray-400">
           <ImageIcon className="w-12 h-12 mx-auto mb-2 opacity-50" />

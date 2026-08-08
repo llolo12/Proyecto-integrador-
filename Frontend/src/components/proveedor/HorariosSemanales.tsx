@@ -1,3 +1,17 @@
+/**
+ * Componente: HorariosSemanales
+ * 
+ * Tabla editable para los horarios de atención del proveedor.
+ * Funcionalidades:
+ * - Toggle abierto/cerrado por día
+ * - Selector de hora de apertura y cierre
+ * - Botón "Aplicar a todos" para copiar horario del primer día abierto
+ * 
+ * Conecta con: PUT /proveedores/{id}/horarios
+ * 
+ * @param horarios - Array de horarios actuales (7 días)
+ * @param onSave - Callback para guardar los cambios
+ */
 import { useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import { Save, Loader2, Clock } from 'lucide-react';
@@ -8,10 +22,12 @@ interface HorariosSemanalesProps {
   onSave: (horarios: HorarioSemanal[]) => Promise<{ success: boolean; error?: string }>;
 }
 
+// Días de la semana en orden (lunes a domingo)
 const DIAS_SEMANA: HorarioSemanal['dia_semana'][] = [
   'lunes', 'martes', 'miercoles', 'jueves', 'viernes', 'sabado', 'domingo'
 ];
 
+// Traducciones de los días (español)
 const DIAS_TRADUCCION: Record<string, string> = {
   lunes: 'Lunes',
   martes: 'Martes',
@@ -24,8 +40,13 @@ const DIAS_TRADUCCION: Record<string, string> = {
 
 export default function HorariosSemanales({ horarios, onSave }: HorariosSemanalesProps) {
   const { t } = useTranslation();
+  
+  /**
+   * Inicializar horarios editados:
+   * - Si existe horario para el día, usarlo
+   * - Si no existe, crear uno con valores por defecto (cerrado, 8:00-17:00)
+   */
   const [horariosEditados, setHorariosEditados] = useState<HorarioSemanal[]>(() => {
-    // Inicializar con los horarios existentes o crear vacíos
     const iniciales: HorarioSemanal[] = DIAS_SEMANA.map(dia => {
       const existente = horarios.find(h => h.dia_semana === dia);
       return existente || {
@@ -37,21 +58,33 @@ export default function HorariosSemanales({ horarios, onSave }: HorariosSemanale
     });
     return iniciales;
   });
+  
+  // Estado para el botón de guardar y mensajes
   const [saving, setSaving] = useState(false);
   const [message, setMessage] = useState<{ type: 'success' | 'error'; text: string } | null>(null);
 
+  /**
+   * Alterna el estado abierto/cerrado de un día
+   */
   const handleToggleDia = (index: number) => {
     setHorariosEditados(prev => prev.map((h, i) => 
       i === index ? { ...h, abierto: !h.abierto } : h
     ));
   };
 
+  /**
+   * Actualiza la hora de apertura o cierre de un día
+   */
   const handleHoraChange = (index: number, campo: 'hora_apertura' | 'hora_cierre', valor: string) => {
     setHorariosEditados(prev => prev.map((h, i) => 
       i === index ? { ...h, [campo]: valor } : h
     ));
   };
 
+  /**
+   * Copia el horario del primer día abierto a todos los demás días
+   * Útil para establecer horarios uniformes rápidamente
+   */
   const handleAplicarATodos = () => {
     const primerAbierto = horariosEditados.find(h => h.abierto);
     if (!primerAbierto) return;
@@ -63,6 +96,9 @@ export default function HorariosSemanales({ horarios, onSave }: HorariosSemanale
     })));
   };
 
+  /**
+   * Envía los horarios al servidor
+   */
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     setSaving(true);
@@ -82,6 +118,7 @@ export default function HorariosSemanales({ horarios, onSave }: HorariosSemanale
 
   return (
     <form onSubmit={handleSubmit} className="bg-white rounded-lg border border-gray-200 p-6">
+      {/* Header con título y botón "Aplicar a todos" */}
       <div className="flex items-center justify-between mb-4">
         <h2 className="text-lg font-semibold text-gray-800 flex items-center gap-2">
           <Clock className="w-5 h-5" />
@@ -97,6 +134,7 @@ export default function HorariosSemanales({ horarios, onSave }: HorariosSemanale
         </button>
       </div>
 
+      {/* Mensaje temporal de éxito/error */}
       {message && (
         <div className={`mb-4 p-3 rounded-md text-sm ${
           message.type === 'success' ? 'bg-green-50 text-green-700' : 'bg-red-50 text-red-700'
@@ -105,6 +143,7 @@ export default function HorariosSemanales({ horarios, onSave }: HorariosSemanale
         </div>
       )}
 
+      {/* Lista de días con sus horarios */}
       <div className="space-y-3">
         {horariosEditados.map((horario, index) => (
           <div
@@ -113,7 +152,7 @@ export default function HorariosSemanales({ horarios, onSave }: HorariosSemanale
               horario.abierto ? 'border-pv-green bg-green-50/50' : 'border-gray-200 bg-gray-50'
             }`}
           >
-            {/* Toggle abierto/cerrado */}
+            {/* Toggle abierto/cerrado con nombre del día */}
             <label className="flex items-center gap-2 w-32 cursor-pointer">
               <input
                 type="checkbox"
@@ -126,7 +165,7 @@ export default function HorariosSemanales({ horarios, onSave }: HorariosSemanale
               </span>
             </label>
 
-            {/* Horarios */}
+            {/* Selectores de hora (solo si está abierto) */}
             {horario.abierto ? (
               <div className="flex items-center gap-2 flex-1">
                 <input
@@ -152,7 +191,7 @@ export default function HorariosSemanales({ horarios, onSave }: HorariosSemanale
         ))}
       </div>
 
-      {/* Botón guardar */}
+      {/* Botón de guardar con estado de carga */}
       <div className="mt-6 flex justify-end">
         <button
           type="submit"

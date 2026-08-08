@@ -1,3 +1,13 @@
+/**
+ * Componente: EstadoVerificacion
+ * 
+ * Muestra el estado de verificación del proveedor con 3 estados visuales:
+ * - Pendiente (amarillo): El perfil está siendo revisado
+ * - Aprobado (verde): El perfil fue verificado exitosamente
+ * - Rechazado (rojo): El perfil no cumplió los requisitos
+ * 
+ * Cada estado tiene su propio icono, color y mensaje descriptivo.
+ */
 import { useTranslation } from 'react-i18next';
 import { CheckCircle, XCircle, Clock } from 'lucide-react';
 
@@ -8,6 +18,7 @@ interface EstadoVerificacionProps {
 export default function EstadoVerificacion({ estado }: EstadoVerificacionProps) {
   const { t } = useTranslation();
 
+  // Configuración visual para cada estado de verificación
   const config = {
     pendiente: {
       icon: Clock,
@@ -38,6 +49,7 @@ export default function EstadoVerificacion({ estado }: EstadoVerificacionProps) 
     },
   };
 
+  // Obtener configuración según el estado actual
   const { icon: Icon, bgColor, borderColor, iconColor, textColor, label, description } = config[estado];
 
   return (

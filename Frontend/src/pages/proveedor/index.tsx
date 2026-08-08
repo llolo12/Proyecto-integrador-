@@ -1,3 +1,23 @@
+/**
+ * Página: Panel del Proveedor
+ * 
+ * Página principal del panel de administración del proveedor.
+ * Organiza todos los componentes en un sistema de tabs:
+ * - Mi Perfil: Información básica del negocio
+ * - Imágenes: Galería con drag & drop
+ * - Horarios: Horarios semanales de atención
+ * - Excepciones: Feriados y horarios especiales
+ * - Contacto: Información de contacto
+ * 
+ * Flujo de carga:
+ * 1. Obtiene el ID del proveedor asociado al usuario actual
+ * 2. Carga todos los datos del proveedor usando el hook useProveedor
+ * 3. Muestra el panel con tabs o mensajes de error/estado vacío
+ * 
+ * Rutas:
+ * - /proveedor (requiere autenticación)
+ * - /demo/proveedor (público, con datos mock)
+ */
 import { useState, useEffect } from 'react';
 import { useTranslation } from 'react-i18next';
 import { Loader2, AlertCircle } from 'lucide-react';
@@ -11,8 +31,10 @@ import ExcepcionesHorario from '../../components/proveedor/ExcepcionesHorario';
 import ContactoForm from '../../components/proveedor/ContactoForm';
 import api from '../../api/axios';
 
+// Tipos de tabs disponibles
 type TabId = 'perfil' | 'imagenes' | 'horarios' | 'excepciones' | 'contacto';
 
+// Interfaz para la configuración de cada tab
 interface Tab {
   id: TabId;
   label: string;
@@ -21,11 +43,19 @@ interface Tab {
 export default function PanelProveedor() {
   const { t } = useTranslation();
   const { user } = useAuth();
+  
+  // Estado para el ID del proveedor (se obtiene del usuario actual)
   const [proveedorId, setProveedorId] = useState<string | null>(null);
   const [loadingProveedorId, setLoadingProveedorId] = useState(true);
+  
+  // Estado para la tab activa (por defecto: perfil)
   const [activeTab, setActiveTab] = useState<TabId>('perfil');
 
-  // Obtener el ID del proveedor del usuario actual
+  /**
+   * Efecto: Obtener el ID del proveedor asociado al usuario actual
+   * Se ejecuta cuando cambia user.id
+   * Consulta: GET /proveedores?usuario_id={userId}
+   */
   useEffect(() => {
     const fetchProveedorId = async () => {
       if (!user?.id) return;
@@ -46,6 +76,10 @@ export default function PanelProveedor() {
     fetchProveedorId();
   }, [user?.id]);
 
+  /**
+   * Hook useProveedor: Maneja todos los datos y operaciones del proveedor
+   * Solo se activa cuando hay un proveedorId válido
+   */
   const {
     proveedor,
     horarios,
@@ -64,6 +98,7 @@ export default function PanelProveedor() {
     reorderImagenes,
   } = useProveedor(proveedorId);
 
+  // Configuración de las tabs del panel
   const tabs: Tab[] = [
     { id: 'perfil', label: t('proveedor.tabs.perfil', 'Mi Perfil') },
     { id: 'imagenes', label: t('proveedor.tabs.imagenes', 'Imágenes') },
@@ -72,6 +107,7 @@ export default function PanelProveedor() {
     { id: 'contacto', label: t('proveedor.tabs.contacto', 'Contacto') },
   ];
 
+  // Estado: Cargando ID del proveedor
   if (loadingProveedorId) {
     return (
       <div className="flex items-center justify-center min-h-[400px]">
@@ -80,6 +116,7 @@ export default function PanelProveedor() {
     );
   }
 
+  // Estado: Usuario no tiene perfil de proveedor
   if (!proveedorId) {
     return (
       <div className="mx-auto max-w-4xl px-4 py-8">
@@ -96,6 +133,7 @@ export default function PanelProveedor() {
     );
   }
 
+  // Estado: Cargando datos del proveedor
   if (loading || !proveedor) {
     return (
       <div className="flex items-center justify-center min-h-[400px]">
@@ -104,6 +142,7 @@ export default function PanelProveedor() {
     );
   }
 
+  // Estado: Error al cargar datos
   if (error) {
     return (
       <div className="mx-auto max-w-4xl px-4 py-8">
@@ -118,9 +157,10 @@ export default function PanelProveedor() {
     );
   }
 
+  // Renderizado principal del panel
   return (
     <div className="mx-auto max-w-6xl px-4 py-8">
-      {/* Header */}
+      {/* Header: Título y nombre del proveedor */}
       <div className="mb-6">
         <h1 className="text-2xl font-bold text-gray-800">
           {t('proveedor.panel.titulo', 'Panel del Proveedor')}
@@ -130,12 +170,12 @@ export default function PanelProveedor() {
         </p>
       </div>
 
-      {/* Estado de verificación */}
+      {/* Banner de estado de verificación (siempre visible) */}
       <div className="mb-6">
         <EstadoVerificacion estado={proveedor.estado_verificacion} />
       </div>
 
-      {/* Tabs */}
+      {/* Navegación por tabs */}
       <div className="border-b border-gray-200 mb-6">
         <nav className="flex gap-4 overflow-x-auto">
           {tabs.map((tab) => (
@@ -154,7 +194,7 @@ export default function PanelProveedor() {
         </nav>
       </div>
 
-      {/* Content */}
+      {/* Contenido de la tab activa */}
       <div className="space-y-6">
         {activeTab === 'perfil' && (
           <PerfilForm proveedor={proveedor} onSave={updatePerfil} />
