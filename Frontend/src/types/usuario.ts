@@ -1,4 +1,4 @@
-export interface Usuario {
+﻿export interface Usuario {
   id: string;
   nombre: string;
   correo: string;
@@ -8,10 +8,12 @@ export interface Usuario {
   idioma: string;
   created_at: string;
 }
-
 export interface Rol {
   id: string;
   nombre: string;
   permisos: Record<string, string[]>;
   created_at: string;
+}
+export interface UsuarioAdmin extends Usuario {
+  rol_nombre: string | null;
 }
