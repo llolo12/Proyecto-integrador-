@@ -1,5 +1,5 @@
--- ============================================================
--- Pura Vida Conecta — DDL Inicial
+﻿-- ============================================================
+-- Pura Vida Conecta â€” DDL Inicial
 -- PostgreSQL 16 + UUIDs + ENUMs + Seed Data
 -- Idempotente: todo con IF NOT EXISTS
 -- ============================================================
@@ -89,6 +89,9 @@ CREATE TABLE IF NOT EXISTS proveedor (
   created_at TIMESTAMPTZ NOT NULL DEFAULT NOW()
 );
 
+-- Motivo de rechazo/observacion cuando un admin rechaza un proveedor
+ALTER TABLE proveedor ADD COLUMN IF NOT EXISTS motivo_rechazo TEXT;
+
 CREATE TABLE IF NOT EXISTS imagen_proveedor (
   id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
   proveedor_id UUID NOT NULL REFERENCES proveedor(id) ON DELETE CASCADE,
@@ -147,7 +150,7 @@ CREATE TABLE IF NOT EXISTS proveedor_destino (
 );
 
 -- ============================================================
--- DOMINIO AUDITORÍA
+-- DOMINIO AUDITORÃA
 -- ============================================================
 
 CREATE TABLE IF NOT EXISTS log_accion (
@@ -161,7 +164,7 @@ CREATE TABLE IF NOT EXISTS log_accion (
 );
 
 -- ============================================================
--- MÓDULO SECUNDARIO (comentado — descomentar cuando se requiera)
+-- MÃ“DULO SECUNDARIO (comentado â€” descomentar cuando se requiera)
 -- ============================================================
 
 -- CREATE TABLE IF NOT EXISTS resena (
