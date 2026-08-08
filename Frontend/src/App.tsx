@@ -9,6 +9,7 @@ import Register from './pages/auth/Register';
 import ListadoProveedores from './pages/explorar/Listado';
 import DetalleProveedor from './pages/explorar/Detalle';
 import PerfilProveedor from './pages/proveedor/index';
+import DemoProveedor from './pages/proveedor/Demo';
 import AdminDashboard from './pages/admin/index';
 
 function NotFound() {
@@ -31,6 +32,9 @@ export default function App() {
             <Route path="/register" element={<Register />} />
             <Route path="/explorar" element={<ListadoProveedores />} />
             <Route path="/explorar/:id" element={<DetalleProveedor />} />
+
+            {/* Ruta de demostración del panel del proveedor (sin autenticación) */}
+            <Route path="/demo/proveedor" element={<DemoProveedor />} />
 
             <Route element={<PrivateRoute />}>
               <Route path="/proveedor/*" element={<PerfilProveedor />} />
