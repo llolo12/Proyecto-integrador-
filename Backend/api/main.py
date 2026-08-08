@@ -7,7 +7,7 @@ from contextlib import asynccontextmanager
 from core.config import settings
 from core.database import engine
 from middleware.security import SecurityHeadersMiddleware
-from routers import auth, usuarios, proveedores, destinos, admin
+from routers import auth, usuarios, proveedores, destinos, admin, contenido
 limiter = Limiter(key_func=get_remote_address)
 @asynccontextmanager
 async def lifespan(app: FastAPI):
@@ -37,6 +37,7 @@ app.include_router(usuarios.router, prefix="/api/v1")
 app.include_router(proveedores.router, prefix="/api/v1")
 app.include_router(destinos.router, prefix="/api/v1")
 app.include_router(admin.router, prefix="/api/v1")
+app.include_router(contenido.router, prefix="/api/v1")
 @app.get("/")
 async def health_check():
     return {

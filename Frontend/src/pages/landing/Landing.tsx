@@ -1,14 +1,16 @@
-import { useEffect, useState } from 'react';
+﻿import { useEffect, useState } from 'react';
 import { Link } from 'react-router-dom';
 import { useTranslation } from 'react-i18next';
 import api from '../../api/axios';
 import Card from '../../components/ui/Card';
 import Button from '../../components/ui/Button';
 import type { Proveedor } from '../../types/proveedor';
+import type { Configuracion } from '../../types/configuracion';
 
 export default function Landing() {
   const { t } = useTranslation();
   const [destacados, setDestacados] = useState<Proveedor[]>([]);
+  const [cms, setCms] = useState<Record<string, string>>({});
 
   const categorias = [
     { key: 'hoteles', icon: '🏨' },
@@ -23,15 +25,25 @@ export default function Landing() {
       .catch(() => {});
   }, []);
 
+  useEffect(() => {
+    api.get<Configuracion[]>('/contenido/landing')
+      .then((res) => {
+        const map: Record<string, string> = {};
+        res.data.forEach((item) => { map[item.clave] = item.valor; });
+        setCms(map);
+      })
+      .catch(() => {});
+  }, []);
+
   return (
     <div>
       <section className="relative bg-gradient-to-br from-pv-green-dark via-pv-green to-pv-green-light px-4 py-24 text-center text-white">
         <div className="mx-auto max-w-3xl">
           <h1 className="text-4xl font-bold md:text-6xl">
-            {t('landing.hero_title')}
+            {cms['landing.hero_title'] ?? t('landing.hero_title')}
           </h1>
           <p className="mt-4 text-lg text-pv-sand/90">
-            {t('landing.hero_subtitle')}
+            {cms['landing.hero_subtitle'] ?? t('landing.hero_subtitle')}
           </p>
           <div className="mt-8 flex justify-center gap-4">
             <Link to="/explorar">

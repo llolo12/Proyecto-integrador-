@@ -1,15 +1,17 @@
 ﻿import { NavLink, Route, Routes, Navigate } from 'react-router-dom';
 import { useTranslation } from 'react-i18next';
-import { Building2, Users, MapPinned, ScrollText } from 'lucide-react';
+import { Building2, Users, MapPinned, ScrollText, FileText } from 'lucide-react';
 import AdminProveedores from './Proveedores';
 import AdminUsuarios from './Usuarios';
 import AdminDestinos from './Destinos';
 import AdminAuditoria from './Auditoria';
+import AdminConfiguracion from './Configuracion';
 const tabs = [
   { to: '/admin/proveedores', label: 'Proveedores', icon: Building2 },
   { to: '/admin/usuarios', label: 'Usuarios', icon: Users },
   { to: '/admin/destinos', label: 'Destinos', icon: MapPinned },
   { to: '/admin/auditoria', label: 'Auditoria', icon: ScrollText },
+  { to: '/admin/configuracion', label: 'Configuracion', icon: FileText },
 ];
 export default function DashboardAdmin() {
   const { t } = useTranslation();
@@ -43,6 +45,7 @@ export default function DashboardAdmin() {
         <Route path="usuarios" element={<AdminUsuarios />} />
         <Route path="destinos" element={<AdminDestinos />} />
         <Route path="auditoria" element={<AdminAuditoria />} />
+        <Route path="configuracion" element={<AdminConfiguracion />} />
       </Routes>
     </div>
   );
