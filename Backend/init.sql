@@ -1,51 +1,41 @@
 ﻿-- ============================================================
--- Pura Vida Conecta â€” DDL Inicial
+-- Pura Vida Conecta -- DDL Inicial
 -- PostgreSQL 16 + UUIDs + ENUMs + Seed Data
 -- Idempotente: todo con IF NOT EXISTS
 -- ============================================================
-
 CREATE EXTENSION IF NOT EXISTS pgcrypto;
-
 -- ============================================================
 -- ENUMS
 -- ============================================================
-
 DO $$ BEGIN
   CREATE TYPE tipo_auth AS ENUM ('local', 'oauth');
 EXCEPTION WHEN duplicate_object THEN NULL;
 END $$;
-
 DO $$ BEGIN
   CREATE TYPE estado_usuario AS ENUM ('activo', 'suspendido', 'pendiente');
 EXCEPTION WHEN duplicate_object THEN NULL;
 END $$;
-
 DO $$ BEGIN
   CREATE TYPE estado_verificacion AS ENUM ('pendiente', 'aprobado', 'rechazado');
 EXCEPTION WHEN duplicate_object THEN NULL;
 END $$;
-
 DO $$ BEGIN
   CREATE TYPE dia_semana AS ENUM ('lunes','martes','miercoles','jueves','viernes','sabado','domingo');
 EXCEPTION WHEN duplicate_object THEN NULL;
 END $$;
-
 DO $$ BEGIN
   CREATE TYPE tipo_contacto AS ENUM ('telefono','web','instagram','whatsapp');
 EXCEPTION WHEN duplicate_object THEN NULL;
 END $$;
-
 -- ============================================================
 -- DOMINIO USUARIOS
 -- ============================================================
-
 CREATE TABLE IF NOT EXISTS rol (
   id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
   nombre VARCHAR(100) NOT NULL UNIQUE,
   permisos JSONB NOT NULL DEFAULT '{}',
   created_at TIMESTAMPTZ NOT NULL DEFAULT NOW()
 );
-
 CREATE TABLE IF NOT EXISTS usuario (
   id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
   nombre VARCHAR(150) NOT NULL,
@@ -57,7 +47,6 @@ CREATE TABLE IF NOT EXISTS usuario (
   idioma VARCHAR(5) NOT NULL DEFAULT 'es',
   created_at TIMESTAMPTZ NOT NULL DEFAULT NOW()
 );
-
 CREATE TABLE IF NOT EXISTS sesion (
   id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
   usuario_id UUID NOT NULL REFERENCES usuario(id) ON DELETE CASCADE,
@@ -66,16 +55,13 @@ CREATE TABLE IF NOT EXISTS sesion (
   created_at TIMESTAMPTZ NOT NULL DEFAULT NOW(),
   expires_at TIMESTAMPTZ NOT NULL
 );
-
 -- ============================================================
 -- DOMINIO PROVEEDORES
 -- ============================================================
-
 CREATE TABLE IF NOT EXISTS categoria_proveedor (
   id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
   nombre VARCHAR(100) NOT NULL UNIQUE
 );
-
 CREATE TABLE IF NOT EXISTS proveedor (
   id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
   usuario_id UUID NOT NULL UNIQUE REFERENCES usuario(id) ON DELETE CASCADE,
@@ -88,28 +74,23 @@ CREATE TABLE IF NOT EXISTS proveedor (
   lng DECIMAL(11,8),
   created_at TIMESTAMPTZ NOT NULL DEFAULT NOW()
 );
-
 -- Motivo de rechazo/observacion cuando un admin rechaza un proveedor
 ALTER TABLE proveedor ADD COLUMN IF NOT EXISTS motivo_rechazo TEXT;
-
 CREATE TABLE IF NOT EXISTS imagen_proveedor (
   id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
   proveedor_id UUID NOT NULL REFERENCES proveedor(id) ON DELETE CASCADE,
   url_webp VARCHAR(500) NOT NULL,
   orden INT NOT NULL DEFAULT 0
 );
-
 CREATE TABLE IF NOT EXISTS contacto_proveedor (
   id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
   proveedor_id UUID NOT NULL REFERENCES proveedor(id) ON DELETE CASCADE,
   tipo tipo_contacto NOT NULL,
   valor VARCHAR(300) NOT NULL
 );
-
 -- ============================================================
 -- DOMINIO HORARIOS
 -- ============================================================
-
 CREATE TABLE IF NOT EXISTS horario_semanal (
   id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
   proveedor_id UUID NOT NULL REFERENCES proveedor(id) ON DELETE CASCADE,
@@ -118,7 +99,6 @@ CREATE TABLE IF NOT EXISTS horario_semanal (
   hora_cierre TIME NOT NULL,
   abierto BOOLEAN NOT NULL DEFAULT true
 );
-
 CREATE TABLE IF NOT EXISTS excepcion_horario (
   id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
   proveedor_id UUID NOT NULL REFERENCES proveedor(id) ON DELETE CASCADE,
@@ -130,11 +110,9 @@ CREATE TABLE IF NOT EXISTS excepcion_horario (
   alerta BOOLEAN NOT NULL DEFAULT true,
   created_at TIMESTAMPTZ NOT NULL DEFAULT NOW()
 );
-
 -- ============================================================
 -- DOMINIO CONTENIDO
 -- ============================================================
-
 CREATE TABLE IF NOT EXISTS destino (
   id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
   nombre VARCHAR(200) NOT NULL,
@@ -142,17 +120,24 @@ CREATE TABLE IF NOT EXISTS destino (
   lat DECIMAL(10,8),
   lng DECIMAL(11,8)
 );
-
 CREATE TABLE IF NOT EXISTS proveedor_destino (
   proveedor_id UUID NOT NULL REFERENCES proveedor(id) ON DELETE CASCADE,
   destino_id UUID NOT NULL REFERENCES destino(id) ON DELETE CASCADE,
   PRIMARY KEY (proveedor_id, destino_id)
 );
-
 -- ============================================================
--- DOMINIO AUDITORÃA
+-- DOMINIO CMS (CONFIGURACION DE LANDING)
 -- ============================================================
-
+CREATE TABLE IF NOT EXISTS configuracion (
+  id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
+  clave VARCHAR(150) NOT NULL UNIQUE,
+  valor TEXT NOT NULL,
+  descripcion VARCHAR(300),
+  updated_at TIMESTAMPTZ NOT NULL DEFAULT NOW()
+);
+-- ============================================================
+-- DOMINIO AUDITORIA
+-- ============================================================
 CREATE TABLE IF NOT EXISTS log_accion (
   id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
   usuario_id UUID REFERENCES usuario(id),
@@ -162,11 +147,11 @@ CREATE TABLE IF NOT EXISTS log_accion (
   ip VARCHAR(45),
   timestamp TIMESTAMPTZ NOT NULL DEFAULT NOW()
 );
-
+CREATE INDEX IF NOT EXISTS idx_log_accion_timestamp ON log_accion (timestamp DESC);
+CREATE INDEX IF NOT EXISTS idx_log_accion_entidad ON log_accion (entidad);
 -- ============================================================
--- MÃ“DULO SECUNDARIO (comentado â€” descomentar cuando se requiera)
+-- MODULO SECUNDARIO (comentado -- descomentar cuando se requiera)
 -- ============================================================
-
 -- CREATE TABLE IF NOT EXISTS resena (
 --   id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
 --   usuario_id UUID NOT NULL REFERENCES usuario(id) ON DELETE CASCADE,
@@ -175,18 +160,19 @@ CREATE TABLE IF NOT EXISTS log_accion (
 --   comentario TEXT,
 --   fecha TIMESTAMPTZ NOT NULL DEFAULT NOW()
 -- );
-
 -- ============================================================
 -- SEED DATA
 -- ============================================================
-
 INSERT INTO categoria_proveedor (nombre) VALUES
   ('hotel'),
   ('restaurante'),
   ('guia_turistica'),
   ('actividad')
 ON CONFLICT (nombre) DO NOTHING;
-
+INSERT INTO configuracion (clave, valor, descripcion) VALUES
+  ('landing.hero_title', 'Descubre Puntarenas, Costa Rica', 'Titulo principal del hero en la landing'),
+  ('landing.hero_subtitle', 'Conecta con hoteles, restaurantes, guias y actividades locales', 'Subtitulo del hero en la landing')
+ON CONFLICT (clave) DO NOTHING;
 INSERT INTO rol (nombre, permisos) VALUES
   ('turista', '{"resenas":["crear","leer"],"perfil":["editar","leer"],"favoritos":["crear","leer","eliminar"]}'),
   ('administrador', '{"usuarios":["crear","leer","editar","eliminar"],"proveedores":["crear","leer","editar","eliminar","verificar"],"roles":["crear","leer","editar","eliminar"],"auditoria":["leer"],"configuracion":["leer","editar"]}')

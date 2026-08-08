@@ -9,7 +9,8 @@ from schemas.usuario import UsuarioAdminResponse, UsuarioEstadoUpdate
 from schemas.proveedor import ProveedorAdminResponse, ProveedorEstadoUpdate
 from schemas.destino import DestinoCreate, DestinoResponse, DestinoUpdate
 from schemas.auditoria import LogAccionPage, LogAccionResponse
-from services import usuario_service, proveedor_service, destino_service, auditoria_service
+from schemas.configuracion import ConfiguracionResponse, ConfiguracionUpdate
+from services import usuario_service, proveedor_service, destino_service, auditoria_service, configuracion_service
 router = APIRouter(prefix="/admin", tags=["admin"])
 async def require_admin(user: dict = Depends(get_current_user)):
     if user.get("rol") != "administrador":
@@ -187,3 +188,20 @@ async def list_logs(
         for log in logs
     ]
     return LogAccionPage(items=items, total=total, skip=skip, limit=limit)
+# ============================================================
+# CONFIGURACION (CMS de landing - Clarence)
+# ============================================================
+@router.get("/configuracion", response_model=list[ConfiguracionResponse])
+async def list_configuracion(
+    admin: dict = Depends(require_admin),
+    db: AsyncSession = Depends(get_db),
+):
+    return await configuracion_service.list_configuraciones(db)
+@router.put("/configuracion/{clave}", response_model=ConfiguracionResponse)
+async def update_configuracion(
+    clave: str,
+    data: ConfiguracionUpdate,
+    admin: dict = Depends(require_admin),
+    db: AsyncSession = Depends(get_db),
+):
+    return await configuracion_service.update_configuracion(db, clave, data)
